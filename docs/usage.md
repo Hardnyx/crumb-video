@@ -8,7 +8,7 @@ Extract the complete portable ZIP and open `Crumb.exe`. Keep its `tools` and oth
 2. Enter the maximum size in **MB**, or choose a quick preset.
 3. Keep **Original** resolution or select a smaller height. Crumb never deliberately upscales the video.
 4. Check the destination. The suggested name ends in `-crumb.mp4` and avoids existing files.
-5. Click **Compress video**. Once the output has been checked, use **Open video** to view it.
+5. Click **Compress**. After it finishes, use **Open output** to view the file.
 
 All processing happens on your computer. There are no uploads, accounts, or network services in the application.
 
@@ -18,7 +18,7 @@ One MB means 1,000,000 bytes. Choose a size slightly below a service's limit whe
 
 A smaller limit requires less information per second. A long video may need lower resolution or may not fit a very small limit at all. Crumb warns when the calculated bitrate is low. It may make up to three encoding attempts to fit the cap; progress restarts when it retries.
 
-Two passes take longer than a single encode. **Use less CPU** reduces the number of encoding threads, which can help keep other applications responsive but usually takes longer. GPU encoding is not included in this version.
+Two passes take longer than a single encode. **Limit CPU use** uses fewer encoding threads. It can help other programs remain responsive but usually takes longer. GPU encoding is not included in this version.
 
 ## Files and cancellation
 
@@ -29,7 +29,7 @@ An operating-system crash or forced termination may leave a `.crumb-*` temporary
 ## Current limits
 
 - Output is MP4 with 8-bit H.264 video and AAC audio, when audio is present.
-- One video stream and one default audio stream are retained. Other audio tracks, subtitles, attachments, and chapters are omitted.
+- One video stream and one default audio stream are retained. Audio is mono or stereo. Other audio tracks, subtitles, attachments, and chapters are omitted.
 - The output's duration is checked against the source; a file cannot satisfy the cap by silently truncating the video.
 - HDR inputs are rejected to avoid producing an incorrectly converted image. Export an SDR copy first.
 - Media without a usable duration, damaged inputs, or unsupported codecs are rejected.

@@ -4,38 +4,18 @@
   <Application.Styles>
     <FluentTheme />
     <Style Selector="Window">
-      <Setter Property="FontFamily" Value="avares://Avalonia.Fonts.Inter/Assets#Inter" />
-      <Setter Property="FontSize" Value="14" />
-      <Setter Property="Foreground" Value="#172D32" />
-      <Setter Property="Background" Value="#F5F7F6" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="Background" Value="#F0F0F0" />
     </Style>
     <Style Selector="Button">
-      <Setter Property="CornerRadius" Value="8" />
-      <Setter Property="Padding" Value="16,10" />
-      <Setter Property="Cursor" Value="Hand" />
-    </Style>
-    <Style Selector="Button.primary">
-      <Setter Property="Background" Value="#146E5A" />
-      <Setter Property="Foreground" Value="White" />
-      <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Padding" Value="24,13" />
-    </Style>
-    <Style Selector="Button.preset">
-      <Setter Property="Background" Value="#EDF5F1" />
-      <Setter Property="BorderThickness" Value="0" />
-      <Setter Property="Foreground" Value="#146E5A" />
-      <Setter Property="Padding" Value="12,6" />
-      <Setter Property="FontSize" Value="12" />
-    </Style>
-    <Style Selector="TextBlock.muted">
-      <Setter Property="Foreground" Value="#60746F" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="12,5" />
     </Style>
     <Style Selector="TextBox">
-      <Setter Property="CornerRadius" Value="8" />
-      <Setter Property="Padding" Value="12,9" />
+      <Setter Property="CornerRadius" Value="0" />
     </Style>
     <Style Selector="ComboBox">
-      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="CornerRadius" Value="0" />
     </Style>
   </Application.Styles>
 </Application>

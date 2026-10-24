@@ -13,7 +13,7 @@ namespace Crumb.Tests;
 
 public static class TestApplication
 {
-    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().WithInterFont().UseSkia()
+    public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UseSkia()
         .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
 }
 
@@ -39,7 +39,7 @@ public sealed class DesktopTests
             Dispatcher.UIThread.RunJobs();
             using var frame = window.CaptureRenderedFrame();
             Assert.NotNull(frame);
-            Assert.True(frame.PixelSize.Width >= 680);
+            Assert.True(frame.PixelSize.Width >= 620);
             if (Environment.GetEnvironmentVariable("CRUMB_SCREENSHOT_DIR") is { Length: > 0 } directory)
             {
                 Directory.CreateDirectory(directory);

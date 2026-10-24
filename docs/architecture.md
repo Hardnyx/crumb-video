@@ -2,6 +2,8 @@
 
 This document records the implementation and remaining release-validation work for the first preview.
 
+The interface uses a plain form layout with standard controls, system fonts, a gray background, and no decorative cards or slogans. Keep visible labels and messages short and practical.
+
 ## Desktop application
 
 The application uses C# / .NET 10 with Avalonia 12.1.4 and a small MVVM layer. `Crumb.Desktop` contains the interface and `Crumb.Core` handles media inspection and compression independently. `Crumb.Tests` exercises the core with generated real media and renders the desktop window with Avalonia's headless backend.

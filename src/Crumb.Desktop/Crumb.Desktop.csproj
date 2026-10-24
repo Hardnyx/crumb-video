@@ -10,7 +10,6 @@
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
-    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.4" />
     <ProjectReference Include="../Crumb.Core/Crumb.Core.csproj" />
   </ItemGroup>
 </Project>

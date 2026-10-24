@@ -34,7 +34,7 @@ public sealed class VideoCompressor(MediaTools tools)
                 for (var pass = 1; pass <= 2; pass++)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var stage = pass == 1 ? "Analyzing video · pass 1 of 2" : "Compressing · pass 2 of 2";
+                    var stage = pass == 1 ? "Pass 1 of 2" : "Pass 2 of 2";
                     progress?.Report(new(stage, (pass - 1) * .49, attempt));
                     var clock = Stopwatch.StartNew();
                     var capturedPass = pass;
@@ -61,7 +61,7 @@ public sealed class VideoCompressor(MediaTools tools)
                     if (new FileInfo(input).Length != info.SizeBytes || File.GetLastWriteTimeUtc(input) != inputStamp)
                         throw new MediaException("The original video changed during compression. Please select it again.");
                     File.Move(temporary, output, overwrite: false);
-                    progress?.Report(new("Ready to share", 1, attempt));
+                    progress?.Report(new("Finished", 1, attempt));
                     return new(output, encoded.SizeBytes, attempt);
                 }
 

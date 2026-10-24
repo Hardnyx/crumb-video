@@ -1,6 +1,6 @@
 # Crumb
 
-A lightweight desktop video compressor. Choose a video, set a maximum file size, and save an MP4 copy ready to share.
+A desktop video compressor for Windows. Set a maximum file size and save a compressed MP4 copy.
 
 ![Crumb desktop interface](docs/images/crumb.png)
 
@@ -13,7 +13,7 @@ A lightweight desktop video compressor. Choose a video, set a maximum file size,
 - Check the actual output size and duration before reporting success.
 - Compress locally, preserve the original, and optionally use fewer CPU threads.
 
-Crumb targets the maximum size; it does not promise to fill every available byte or preserve the original quality. Small limits can produce noticeable quality loss. If a video already fits, Crumb offers to open the original instead of re-encoding it.
+The output is checked against the size limit. Small limits can reduce quality. If the input already fits, you can use the original without compressing it.
 
 ## Download and use
 
@@ -21,7 +21,7 @@ Windows x64 preview builds are produced by [GitHub Actions](https://github.com/H
 
 Download `Crumb-0.1.0-win-x64.zip`, extract the complete folder, and run `Crumb.exe`. FFmpeg and ffprobe are included, so no separate .NET, Python, or FFmpeg installation is required. An optional per-user installer uses the same application files.
 
-These are early preview builds. The interface is tested with Avalonia's headless platform; native file dialogs and behavior on a clean Windows installation still need manual verification. See the [usage guide](docs/usage.md) for behavior and limits.
+These are preview builds. Automated tests run on Linux and Windows. File dialogs and behavior on a clean Windows installation still need manual testing. See the [usage guide](docs/usage.md) for details.
 
 ## Development
 

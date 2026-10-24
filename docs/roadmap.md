@@ -14,7 +14,7 @@
 
 ## Before a stable release
 
-- [ ] Confirm successful end-to-end Windows CI and inspect the downloadable package.
+- [x] Confirm successful end-to-end Windows CI and publish a preview package.
 - [ ] Manually verify native file dialogs, drag and drop, playback, display scaling, and closing during a job.
 - [ ] Test the portable build on a clean supported Windows installation without a separately installed runtime or media tools.
 - [ ] Record startup time, idle memory, peak encoding memory, and reduced-CPU behavior on representative hardware.

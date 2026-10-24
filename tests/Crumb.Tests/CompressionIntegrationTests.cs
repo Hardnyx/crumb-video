@@ -56,7 +56,7 @@ public sealed class CompressionIntegrationTests : IDisposable
         var input = await MakeVideo(true, "640x360");
         var output = Path.Combine(_directory, "cancelled.mp4");
         using var cts = new CancellationTokenSource();
-        var progress = new ImmediateProgress(p => { if (p.Stage.Contains("pass 1")) cts.Cancel(); });
+        var progress = new ImmediateProgress(p => { if (p.Stage.Contains("Pass 1")) cts.Cancel(); });
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
             new VideoCompressor(_tools).CompressAsync(new(input, output, 180_000), progress, cts.Token));
         Assert.False(File.Exists(output));
@@ -73,7 +73,7 @@ public sealed class CompressionIntegrationTests : IDisposable
         var observedRunning = false;
         var progress = new ImmediateProgress(p =>
         {
-            if (p.Fraction > 0 && p.Stage.Contains("pass 1"))
+            if (p.Fraction > 0 && p.Stage.Contains("Pass 1"))
             {
                 observedRunning = true;
                 cts.Cancel();

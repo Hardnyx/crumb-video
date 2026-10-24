@@ -14,8 +14,8 @@ public sealed class MainViewModel : INotifyPropertyChanged
     private int _resolution;
     private bool _reducedCpu;
     private bool _isBusy;
-    private string _status = "Make room for your video.";
-    private string _detail = "Choose a video and a size limit to get started.";
+    private string _status = "Select a video.";
+    private string _detail = "Set a maximum size, then click Compress.";
     private string _errorDetails = "";
     private bool _indeterminate;
     private double _progress;
@@ -25,9 +25,9 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public bool IsBusy { get => _isBusy; private set { _isBusy = value; Refresh(); } }
     public bool CanEdit => !IsBusy;
     public bool HasVideo => _info is not null;
-    public string FileName => _info is null ? "Drop a video here" : System.IO.Path.GetFileName(_info.Path);
-    public string SourceDetails => _info is null ? "or select a file from your computer" :
-        $"{FormatSize(_info.SizeBytes)}  ·  {FormatDuration(_info.DurationSeconds)}  ·  {_info.Video.Width} × {_info.Video.Height}  ·  {(_info.Audio is null ? "No audio" : "With audio")}";
+    public string FileName => _info is null ? "No file selected" : System.IO.Path.GetFileName(_info.Path);
+    public string SourceDetails => _info is null ? "No file selected." :
+        $"{FormatSize(_info.SizeBytes)}    {FormatDuration(_info.DurationSeconds)}    {_info.Video.Width} x {_info.Video.Height}    Audio: {(_info.Audio is null ? "no" : "yes")}";
     public string LimitMb { get => _limitMb; set { _limitMb = value; _completedPath = null; Refresh(); } }
     public string OutputPath { get => _outputPath; set { _outputPath = value; Refresh(); } }
     public int ResolutionIndex { get => _resolution; set { _resolution = value; Refresh(); } }
@@ -48,14 +48,14 @@ public sealed class MainViewModel : INotifyPropertyChanged
         get
         {
             if (!TryLimit(out var limit)) return "Enter a size from 0.1 to 1,000,000 MB.";
-            if (_info is null) return "1 MB = 1,000,000 bytes. The final file will be checked against this limit.";
-            if (AlreadyFits) return "This video already fits the limit. You can share the original.";
+            if (_info is null) return "1 MB = 1,000,000 bytes.";
+            if (AlreadyFits) return "The input is below the size limit. No compression is needed.";
             try
             {
                 var plan = SizeBudget.Calculate(_info, limit, MaxHeight, ReducedCpu);
                 return plan.LowQuality
-                    ? "This is a tight limit. Expect visible quality loss; a lower resolution may help."
-                    : $"Up to {100 * (1 - limit / (double)_info.SizeBytes):0}% smaller. Some quality loss is expected.";
+                    ? "Quality will be low at this size. Try a lower resolution or a larger limit."
+                    : $"Size reduction: at least {100 * (1 - limit / (double)_info.SizeBytes):0}%. Quality may decrease.";
             }
             catch (MediaException ex) { return ex.Message; }
         }
@@ -74,16 +74,16 @@ public sealed class MainViewModel : INotifyPropertyChanged
     public async Task LoadAsync(string path)
     {
         if (IsBusy) return;
-        Begin("Reading your video", "Checking duration, dimensions, and audio.");
+        Begin("Reading video...", "");
         IsIndeterminate = true;
         try
         {
             _info = await new MediaProbe(MediaTools.Resolve()).InspectAsync(path, _cancellation!.Token);
             OutputPath = SuggestOutput(_info.Path);
-            Status = "Choose your size limit.";
-            Detail = "The original stays untouched. Compression runs on your computer.";
+            Status = "Ready.";
+            Detail = "Output format: MP4.";
         }
-        catch (OperationCanceledException) { Status = "Reading cancelled."; Detail = "Choose a video when you are ready."; }
+        catch (OperationCanceledException) { Status = "Reading cancelled."; Detail = "No output saved."; }
         catch (Exception ex) { _info = null; ShowError(ex); }
         finally { End(); }
     }
@@ -92,22 +92,22 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (!CanCompress || _info is null || !TryLimit(out var limit)) return;
         var options = new CompressionOptions(_info.Path, OutputPath, limit, MaxHeight, ReducedCpu);
-        Begin("Preparing your video", "You can cancel at any time.");
+        Begin("Starting compression...", "");
         try
         {
             var progress = new Progress<CompressionProgress>(p =>
             {
                 Status = p.Stage;
                 ProgressValue = p.Fraction * 100;
-                Detail = p.Attempt > 1 ? $"Adjusting the size · attempt {p.Attempt} of 3" : "Working locally. Your original is safe.";
+                Detail = p.Attempt > 1 ? $"Attempt {p.Attempt} of 3" : "";
             });
             var result = await new VideoCompressor(MediaTools.Resolve()).CompressAsync(options, progress, _cancellation!.Token);
             _completedPath = result.OutputPath;
             ProgressValue = 100;
-            Status = "Ready to share.";
-            Detail = $"{FormatSize(result.SizeBytes)} · within your {LimitMb} MB limit.";
+            Status = "Finished.";
+            Detail = $"Saved: {FormatSize(result.SizeBytes)}. Limit: {LimitMb} MB.";
         }
-        catch (OperationCanceledException) { Status = "Compression cancelled."; Detail = "No final file was saved. Your original is unchanged."; ProgressValue = 0; }
+        catch (OperationCanceledException) { Status = "Compression cancelled."; Detail = "No output saved."; ProgressValue = 0; }
         catch (Exception ex) { ShowError(ex); ProgressValue = 0; }
         finally { End(); }
     }
@@ -116,13 +116,13 @@ public sealed class MainViewModel : INotifyPropertyChanged
     {
         if (!IsBusy) return;
         _cancellation?.Cancel();
-        Status = "Cancelling…";
-        Detail = "Waiting for the media process to stop and clearing temporary files.";
+        Status = "Cancelling...";
+        Detail = "Waiting for compression to stop.";
     }
 
     public void ShowError(Exception ex)
     {
-        Status = "Something needs your attention.";
+        Status = "Error";
         Detail = ex is MediaException ? ex.Message : "The file could not be processed. Check the output folder and try again.";
         ErrorDetails = ex is MediaException media ? media.Details ?? "" : ex.Message;
     }
@@ -154,7 +154,7 @@ public sealed class MainViewModel : INotifyPropertyChanged
     }
     private void Refresh()
     {
-        foreach (var property in new[] { nameof(IsBusy), nameof(CanEdit), nameof(HasVideo), nameof(FileName), nameof(SourceDetails),
+        foreach (var property in new[] { nameof(IsBusy), nameof(CanEdit), nameof(HasVideo), nameof(InputPath), nameof(FileName), nameof(SourceDetails),
             nameof(LimitMb), nameof(OutputPath), nameof(ResolutionIndex), nameof(ReducedCpu), nameof(CanCompress),
             nameof(CompressionHint), nameof(HasResult), nameof(AlreadyFits) }) Changed(property);
     }

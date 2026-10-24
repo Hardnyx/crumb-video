@@ -4,7 +4,7 @@ Crumb's original material is MIT licensed. That license does not replace the lic
 
 ## Application dependencies
 
-The desktop application uses Avalonia 12.1.4, its Fluent theme and Inter font package, and their resolved runtime dependencies, including SkiaSharp. The publisher copies available license/notice files and NuGet package metadata from the actual dependency graph into `licenses/nuget`. NuGet package versions are pinned in the project files; test-only packages are not distributed with the app.
+The desktop application uses Avalonia 12.1.4, its Fluent theme, and their resolved runtime dependencies, including SkiaSharp. The publisher copies available license/notice files and NuGet package metadata from the actual dependency graph into `licenses/nuget`. NuGet package versions are pinned in the project files; test-only packages are not distributed with the app.
 
 ## Media tools
 
