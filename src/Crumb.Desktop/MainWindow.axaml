@@ -1,0 +1,113 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Crumb.Desktop.ViewModels"
+        x:Class="Crumb.Desktop.MainWindow" x:DataType="vm:MainViewModel"
+        Title="Crumb — Video compressor" Width="840" Height="830" MinWidth="680" MinHeight="680"
+        WindowStartupLocation="CenterScreen">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="36,28,36,24" Spacing="22">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <Border Width="42" Height="42" CornerRadius="12" Background="#146E5A" Margin="0,0,12,0">
+          <Grid Width="20" Height="20" ColumnDefinitions="8,4,8" RowDefinitions="8,4,8">
+            <Border Background="White" CornerRadius="2" />
+            <Border Grid.Column="2" Background="#C9E9D9" CornerRadius="2" />
+            <Border Grid.Row="2" Background="#C9E9D9" CornerRadius="2" />
+            <Border Grid.Row="2" Grid.Column="2" Background="White" CornerRadius="2" />
+          </Grid>
+        </Border>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+          <TextBlock Text="crumb" FontSize="23" FontWeight="Bold" />
+          <TextBlock Text="Less size. More room." Classes="muted" FontSize="12" />
+        </StackPanel>
+        <Border Grid.Column="2" Background="#E3EEE8" CornerRadius="20" Padding="12,6" VerticalAlignment="Center">
+          <TextBlock Text="100% local" FontSize="12" Foreground="#146E5A" />
+        </Border>
+      </Grid>
+
+      <StackPanel Spacing="5">
+        <TextBlock Text="Your video, small enough to send." FontSize="26" FontWeight="SemiBold" />
+        <TextBlock Text="Choose a maximum size. Crumb takes care of the rest." Classes="muted" />
+      </StackPanel>
+
+      <Border x:Name="DropZone" DragDrop.AllowDrop="True" BorderBrush="#BBD6CA" BorderThickness="1.5"
+              CornerRadius="14" Background="White" Padding="22">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <Border Width="48" Height="48" CornerRadius="12" Background="#EDF5F1" Margin="0,0,16,0">
+            <PathIcon Data="M 3 3 L 15 3 L 15 17 L 3 17 Z M 15 7 L 21 4 L 21 16 L 15 13" Width="24" Height="24" Foreground="#146E5A" />
+          </Border>
+          <StackPanel Grid.Column="1" Spacing="5" VerticalAlignment="Center" Margin="0,0,12,0">
+            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding SourceDetails}" FontSize="12" Classes="muted" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="2" Content="Choose video" Click="ChooseVideo" IsEnabled="{Binding CanEdit}" VerticalAlignment="Center" />
+        </Grid>
+      </Border>
+
+      <Border Background="White" CornerRadius="14" Padding="22" BorderBrush="#E1E8E4" BorderThickness="1">
+        <StackPanel Spacing="18">
+          <Grid ColumnDefinitions="*,24,*">
+            <StackPanel Spacing="9">
+              <TextBlock Text="Maximum file size" FontWeight="SemiBold" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox x:Name="LimitInput" Text="{Binding LimitMb, Mode=TwoWay}" IsEnabled="{Binding CanEdit}" PlaceholderText="25"
+                         FontSize="23" FontWeight="SemiBold" AutomationProperties.Name="Maximum file size in megabytes" />
+                <TextBlock Grid.Column="1" Text="MB" Classes="muted" VerticalAlignment="Center" Margin="10,0,2,0" />
+              </Grid>
+              <StackPanel Orientation="Horizontal" Spacing="6" IsEnabled="{Binding CanEdit}">
+                <Button Content="8" Tag="8" Classes="preset" Click="ChoosePreset" />
+                <Button Content="25" Tag="25" Classes="preset" Click="ChoosePreset" />
+                <Button Content="50" Tag="50" Classes="preset" Click="ChoosePreset" />
+                <Button Content="100" Tag="100" Classes="preset" Click="ChoosePreset" />
+              </StackPanel>
+            </StackPanel>
+            <StackPanel Grid.Column="2" Spacing="9">
+              <TextBlock Text="Resolution" FontWeight="SemiBold" />
+              <ComboBox SelectedIndex="{Binding ResolutionIndex, Mode=TwoWay}" HorizontalAlignment="Stretch" IsEnabled="{Binding CanEdit}">
+                <ComboBoxItem Content="Original" />
+                <ComboBoxItem Content="Up to 1080p" />
+                <ComboBoxItem Content="Up to 720p" />
+                <ComboBoxItem Content="Up to 480p" />
+              </ComboBox>
+              <CheckBox Content="Use less CPU" IsChecked="{Binding ReducedCpu, Mode=TwoWay}"
+                        IsEnabled="{Binding CanEdit}" FontSize="12" ToolTip.Tip="Uses fewer encoding threads. Compression may take longer." />
+            </StackPanel>
+          </Grid>
+          <TextBlock Text="{Binding CompressionHint}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+          <Border Height="1" Background="#E7EDE9" />
+          <StackPanel Spacing="8">
+            <TextBlock Text="Save compressed copy to" FontWeight="SemiBold" />
+            <Grid ColumnDefinitions="*,10,Auto">
+              <TextBox Text="{Binding OutputPath, Mode=TwoWay}" IsEnabled="{Binding CanEdit}" PlaceholderText="Select a video first"
+                       FontSize="12" AutomationProperties.Name="Output file path" />
+              <Button Grid.Column="2" Content="Browse…" Click="ChooseOutput" IsEnabled="{Binding CanEdit}" />
+            </Grid>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Background="#EAF2ED" CornerRadius="14" Padding="20">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding Status}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Grid.Column="1" Text="{Binding ProgressLabel}" Classes="muted" Margin="12,0,0,0" />
+          </Grid>
+          <ProgressBar Value="{Binding ProgressValue}" IsIndeterminate="{Binding IsIndeterminate}" Minimum="0" Maximum="100"
+                       Height="5" Foreground="#146E5A" Background="#CFDFD5" ShowProgressText="False" />
+          <TextBlock Text="{Binding Detail}" Classes="muted" FontSize="12" TextWrapping="Wrap" />
+          <Expander Header="Error details" IsVisible="{Binding HasErrorDetails}">
+            <TextBox Text="{Binding ErrorDetails}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="140" FontSize="11" />
+          </Expander>
+        </StackPanel>
+      </Border>
+
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+        <TextBlock Text="Your original stays untouched." Classes="muted" FontSize="12" VerticalAlignment="Center" />
+        <Button Grid.Column="1" Content="Open original" Click="OpenOriginal" IsVisible="{Binding AlreadyFits}" IsEnabled="{Binding CanEdit}" Margin="8,0,0,0" />
+        <Button Grid.Column="2" Content="Open video" Click="OpenResult" IsVisible="{Binding HasResult}" Margin="8,0,0,0" />
+        <Button Grid.Column="2" Content="Cancel" Click="CancelJob" IsVisible="{Binding IsBusy}" Margin="8,0,0,0" />
+        <Button x:Name="CompressButton" Grid.Column="3" Content="Compress video" Classes="primary" IsEnabled="{Binding CanCompress}" Click="CompressVideo" Margin="10,0,0,0" />
+      </Grid>
+      <TextBlock Text="Crumb 0.1 · MP4 output · No uploads" Classes="muted" FontSize="11" HorizontalAlignment="Center" />
+    </StackPanel>
+  </ScrollViewer>
+</Window>

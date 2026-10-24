@@ -1,39 +1,30 @@
 # Roadmap
 
-## Repository setup
+## First preview
 
-- [x] Define the project name and scope.
-- [x] Record the desktop stack and portable distribution plan.
-- [x] Add the project license and contribution conventions.
-- [x] Specify the compression and output validation policy.
+- [x] C# / .NET 10 solution with Avalonia desktop UI and a separate compression core.
+- [x] Video selection, drag and drop, and ffprobe inspection.
+- [x] Editable decimal MB limit, resolution options, and reduced CPU mode.
+- [x] Two-pass MP4 encoding with a size budget, actual-size validation, and bounded retries.
+- [x] Progress, cancellation, temporary-file cleanup, and original-file protection.
+- [x] Real-media tests for silent/portrait clips, duration, decoding, size caps, and Unicode paths.
+- [x] Headless rendering and binding smoke test for the actual window.
+- [x] Windows CI, Native AOT publishing, portable ZIP, and optional installer scripts.
+- [x] Media build from pinned sources with corresponding source and notices in the payload.
 
-## First working version
+## Before a stable release
 
-- [ ] Create and pin the C# / Avalonia solution and dependencies.
-- [ ] Select a local video and inspect it with ffprobe.
-- [ ] Accept a maximum size in decimal MB and show source details.
-- [ ] Encode to MP4 with a calculated bitrate and two passes.
-- [ ] Display progress and support cancellation without freezing the UI.
-- [ ] Verify the actual size, media streams, and duration before reporting success.
-- [ ] Handle impossible limits, invalid inputs, tool failures, and existing output paths.
-- [ ] Validate portrait videos, silent videos, and Unicode paths.
-- [ ] Add relevant automated checks and a Windows CI build.
-
-Acceptance: compress several real videos below their chosen byte limits, keep the originals intact, and leave no partial final file after failure or cancellation.
-
-## First portable release
-
-- [ ] Validate Windows Native AOT publishing and measure startup, memory, and encoding resource use.
-- [ ] Pin and bundle FFmpeg/ffprobe with checksums and the corresponding notices and sources.
-- [ ] Package a ZIP and test it on a clean supported Windows machine.
-- [ ] Document supported inputs, output behavior, and known limitations.
-- [ ] Publish a tested build with release notes and usage screenshots.
-
-Acceptance: download, extract, launch, and compress without installing a runtime or media tools separately.
+- [ ] Confirm successful end-to-end Windows CI and inspect the downloadable package.
+- [ ] Manually verify native file dialogs, drag and drop, playback, display scaling, and closing during a job.
+- [ ] Test the portable build on a clean supported Windows installation without a separately installed runtime or media tools.
+- [ ] Record startup time, idle memory, peak encoding memory, and reduced-CPU behavior on representative hardware.
+- [ ] Test a broader library of real files, including variable frame rate and unusual timestamps.
+- [ ] Consider code signing and a stable release process.
 
 ## Later
 
-- Drag and drop, editable size presets, and an installer.
-- Resolution suggestions and a reduced CPU mode.
-- Hardware encoding after size and quality validation.
-- A sequential batch queue and additional operating systems.
+- Quality-aware resolution suggestions and additional UI languages.
+- Sequential batch queue.
+- GPU encoding after separate size and quality validation.
+- HDR handling and multiple-track controls.
+- Linux and macOS distribution support.

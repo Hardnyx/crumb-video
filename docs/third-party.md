@@ -1,11 +1,27 @@
 # Third-party components
 
-No third-party binaries are distributed in this repository yet. Crumb's MIT license covers its original material, not the dependencies of a future release.
+Crumb's original material is MIT licensed. That license does not replace the licenses of its dependencies or media tools.
 
-The planned desktop UI is [Avalonia](https://github.com/AvaloniaUI/Avalonia). Media processing will use [FFmpeg and ffprobe](https://ffmpeg.org/) as separate executables.
+## Application dependencies
 
-For each distributed component, record its exact version, origin, checksum, license, and required notices. Include corresponding source and build information where required by that component's license. Keep these records with the release payload rather than relying on an unpinned download link.
+The desktop application uses Avalonia 12.1.4, its Fluent theme and Inter font package, and their resolved runtime dependencies, including SkiaSharp. The publisher copies available license/notice files and NuGet package metadata from the actual dependency graph into `licenses/nuget`. NuGet package versions are pinned in the project files; test-only packages are not distributed with the app.
 
-FFmpeg's applicable license depends on its build configuration. A build with GPL components such as libx264 must not be labeled as an LGPL-only build. Before packaging the first release, select a redistributable build, retain its configuration and corresponding source, and include its actual license and notices. Do not distribute a build configured with `--enable-nonfree`.
+## Media tools
 
-Reference: [FFmpeg license and legal considerations](https://ffmpeg.org/legal.html).
+The bundled Windows media executables are compiled from:
+
+| Component | Revision | Role |
+| --- | --- | --- |
+| FFmpeg 9.0.2 | `946fcce07b6dcd0331c8cc609192aeff5e1924f8` | ffmpeg and ffprobe executables |
+| x264 | `31e19f92f00c7003fa115047ce50978bc98c3a0d` | H.264 encoding |
+
+FFmpeg is built with GPL components and version 3 enabled. The resulting media tools are distributed under GPLv3, with the applicable texts in `licenses/media`. Crumb launches them as separate processes; its own code remains under MIT.
+
+The exact, unmodified source archives for FFmpeg and x264 are included under `sources`, with the build script, pinned hashes, and reproduction instructions. Build configuration and compiler output are included under `build-logs`. External media libraries are not auto-detected or bundled by the media build.
+
+References:
+
+- [FFmpeg license and legal considerations](https://ffmpeg.org/legal.html)
+- [FFmpeg source](https://github.com/FFmpeg/FFmpeg)
+- [x264 source mirror](https://github.com/mirror/x264)
+- [Avalonia](https://github.com/AvaloniaUI/Avalonia)

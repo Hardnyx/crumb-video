@@ -1,12 +1,12 @@
 # Architecture
 
-This document records the intended design. None of the components below has been implemented yet.
+This document records the implementation and remaining release-validation work for the first preview.
 
 ## Desktop application
 
-Use C# with Avalonia and a small MVVM layer. Keep video inspection and compression independent of the UI so that they can be tested without a desktop session. Begin with two production projects: `Crumb.Desktop` for the interface and `Crumb.Core` for media jobs. Add tests around the core as behavior is implemented.
+The application uses C# / .NET 10 with Avalonia 12.1.4 and a small MVVM layer. `Crumb.Desktop` contains the interface and `Crumb.Core` handles media inspection and compression independently. `Crumb.Tests` exercises the core with generated real media and renders the desktop window with Avalonia's headless backend.
 
-Choose and pin supported .NET and Avalonia versions when creating the first working build. Use compiled bindings and avoid runtime XAML loading or reflection-based service discovery. Validate Native AOT publishing on a Windows runner before making it the release default. A self-contained build is a fallback if an AOT compatibility issue remains.
+Bindings are compiled, and media JSON is parsed without reflection-based serialization. The Windows pipeline publishes Native AOT and verifies the resulting executable. A self-contained fallback is available through an explicit publishing option.
 
 The first window should contain video selection, source details, an editable size limit, an output location, a compress button, progress, and cancellation. Advanced encoder controls can wait. Do not make users configure FFmpeg paths in the released application.
 
@@ -16,7 +16,7 @@ Bundle platform-specific FFmpeg and ffprobe executables with the portable releas
 
 Start processes directly with `ProcessStartInfo.ArgumentList` and `UseShellExecute = false`. Pass paths as arguments, never through a shell command. Drain standard output and standard error concurrently to avoid blocked pipes. Bound captured error logs and present a concise error in the UI.
 
-Run one compression job at a time initially. Await process completion asynchronously and throttle progress updates. Do not load the complete input video into application memory. Add a reduced CPU mode by limiting encoding threads; benchmark it before choosing defaults. GPU encoding belongs in a later iteration because it needs separate size and quality validation.
+Run one compression job at a time. Process completion is awaited asynchronously, with progress updates throttled to approximately eight per second. The complete video is not loaded into application memory. Normal encoding uses at most eight threads and leaves one logical CPU available when possible; reduced CPU mode halves that cap. These are initial policies, not published performance measurements. GPU encoding remains a later iteration.
 
 ## Inspection and size budget
 
@@ -42,9 +42,9 @@ Keep a validated result temporary until it can be moved to the requested final p
 
 ## Distribution
 
-Windows x64 is the first target. Ship the application, media executables, notices, and necessary native dependencies in one ZIP. Verify that it runs on a clean supported Windows machine without developer tools or a separate .NET/FFmpeg installation. A portable folder may contain several files.
+Windows x64 is the first target. The portable ZIP includes the application, media executables, corresponding media sources, notices, and necessary native dependencies. It still needs manual verification on a clean supported Windows machine without developer tools or a separate .NET/FFmpeg installation. A portable folder contains several files.
 
-An installer can later wrap the same payload for shortcuts and uninstall support. Linux and macOS builds require their own dependency and packaging checks; choosing Avalonia alone does not establish support for those platforms.
+An optional Inno Setup installer wraps the same payload for per-user shortcuts and uninstall support. Linux and macOS builds require their own dependency and packaging checks; choosing Avalonia alone does not establish support for those platforms.
 
 ## References
 

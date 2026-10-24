@@ -1,52 +1,54 @@
 # Crumb
 
-A lightweight desktop app for compressing videos to a maximum file size.
+A lightweight desktop video compressor. Choose a video, set a maximum file size, and save an MP4 copy ready to share.
 
-Choose a video, enter a limit such as **25 MB**, and save a smaller copy ready to share.
+![Crumb desktop interface](docs/images/crumb.png)
 
-> **Status:** initial project setup. The application has not been implemented yet, and there are no downloadable builds.
+## Features
 
-## Planned experience
+- Choose a video or drag it onto the window.
+- Set any limit from 0.1 MB to 1,000,000 MB, with quick presets.
+- Keep the original resolution or reduce it to 1080p, 720p, or 480p.
+- See progress and cancel a job without leaving a partial final file.
+- Check the actual output size and duration before reporting success.
+- Compress locally, preserve the original, and optionally use fewer CPU threads.
 
-- Open a video or drop it onto the window.
-- Enter the maximum output size in MB.
-- Compress locally, with progress and cancellation.
-- Save an MP4 copy and verify that it fits the chosen limit.
-- Keep the original file untouched.
+Crumb targets the maximum size; it does not promise to fill every available byte or preserve the original quality. Small limits can produce noticeable quality loss. If a video already fits, Crumb offers to open the original instead of re-encoding it.
 
-If the requested size would require a substantial quality reduction, Crumb should explain the trade-off before starting. A size limit is not a promise of lossless compression.
+## Download and use
 
-## Technical direction
+Windows x64 preview builds are produced by [GitHub Actions](https://github.com/Hardnyx/crumb-video/actions/workflows/build.yml). Successful builds from `main` are published as [prereleases](https://github.com/Hardnyx/crumb-video/releases).
 
-| Component | Choice |
-| --- | --- |
-| Language | C# |
-| Desktop UI | Avalonia |
-| Media processing | FFmpeg and ffprobe, run as separate processes |
-| Release target | Native AOT, subject to build and compatibility validation |
-| First platform | Windows x64 |
-| Distribution | Portable ZIP with the required media tools included |
-| Initial output | MP4 with H.264 video and AAC audio |
+Download `Crumb-0.1.0-win-x64.zip`, extract the complete folder, and run `Crumb.exe`. FFmpeg and ffprobe are included, so no separate .NET, Python, or FFmpeg installation is required. An optional per-user installer uses the same application files.
 
-The intended release should work without installing Python, .NET, or FFmpeg separately. The ZIP may contain several files; portable does not mean a single executable.
+These are early preview builds. The interface is tested with Avalonia's headless platform; native file dialogs and behavior on a clean Windows installation still need manual verification. See the [usage guide](docs/usage.md) for behavior and limits.
 
-Encoding speed and resource use will depend mainly on the video, encoder settings, and hardware. Native AOT is a deployment choice for the application; it does not make FFmpeg encode faster.
+## Development
 
-## How size targeting will work
+The application uses **C# / .NET 10**, **Avalonia 12.1.4**, and separate FFmpeg/ffprobe processes. Windows releases use Native AOT; a self-contained fallback can be built explicitly. The UI and compression core are separate projects.
 
-Crumb will inspect the video duration, reserve space for audio and container overhead, and calculate a video bitrate. Two-pass encoding will be followed by a check of the actual file size. An oversized result must be retried within a fixed limit or reported as a failure, never shown as a successful compression.
+Install the .NET 10 SDK and obtain FFmpeg with libx264 and AAC support. Set `CRUMB_FFMPEG_DIR` to the folder containing ffmpeg and ffprobe:
 
-The first version will use decimal units: **1 MB = 1,000,000 bytes**. Presets for particular messaging services can be added later; their upload limits should remain editable.
+```powershell
+$env:CRUMB_FFMPEG_DIR = 'C:\tools\ffmpeg\bin'
+dotnet build Crumb.sln -c Release
+dotnet test tests/Crumb.Tests -c Release
+dotnet run --project src/Crumb.Desktop
+```
+
+On Linux, for example, use `export CRUMB_FFMPEG_DIR=/usr/bin`. The core and headless tests run on Linux; native Linux and macOS distribution support is not established yet.
+
+The Windows workflow builds its media tools from pinned, hash-checked FFmpeg and x264 sources, tests the bundle, publishes the app, and compresses a real clip through the resulting executable before packaging it. See [building releases](docs/building.md).
 
 ## Project documents
 
-- [Architecture and compression policy](docs/architecture.md)
-- [Roadmap and acceptance criteria](docs/roadmap.md)
+- [Usage](docs/usage.md)
+- [Architecture and size policy](docs/architecture.md)
+- [Building portable releases and installers](docs/building.md)
+- [Roadmap](docs/roadmap.md)
 - [Contributing](CONTRIBUTING.md)
 - [Third-party components](docs/third-party.md)
 
-Build instructions will be added alongside the first working application. There is currently no command that builds or runs Crumb.
-
 ## License
 
-Crumb's original code and documentation are available under the [MIT license](LICENSE). Third-party software retains its own license; FFmpeg binaries are not included in this repository at this stage.
+Crumb's original code and documentation are [MIT licensed](LICENSE). The bundled FFmpeg/x264 tools have their own GPL licenses. Their corresponding source archives, build script, and notices accompany the portable distribution.

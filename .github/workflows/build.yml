@@ -1,0 +1,130 @@
+name: Build Crumb
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      installer:
+        description: Also build an installer
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Install test media tools
+        run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg
+      - name: Build and test
+        env:
+          CRUMB_FFMPEG_DIR: /usr/bin
+        run: |
+          dotnet build Crumb.sln -c Release
+          dotnet test tests/Crumb.Tests -c Release --no-build --logger trx
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-linux
+          path: tests/Crumb.Tests/TestResults/*.trx
+
+  media:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install cross-compilation tools
+        run: sudo apt-get update -qq && sudo apt-get install -y build-essential mingw-w64 nasm pkg-config curl xz-utils
+      - name: Build pinned FFmpeg and x264 sources for Windows
+        run: bash scripts/build-media.sh "$GITHUB_WORKSPACE/artifacts/media"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: media-build-logs
+          path: artifacts/media/build-logs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-media-tools
+          path: artifacts/media
+          retention-days: 7
+
+  windows:
+    needs: [test, media]
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-media-tools
+          path: artifacts/media
+      - name: Test with the bundled Windows tools
+        shell: pwsh
+        run: |
+          $env:CRUMB_FFMPEG_DIR = Join-Path $pwd 'artifacts/media/tools'
+          dotnet test tests/Crumb.Tests -c Release --logger trx
+          if ($LASTEXITCODE -ne 0) { throw 'Windows tests failed.' }
+      - name: Install optional installer compiler
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.installer)
+        shell: pwsh
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}/Inno Setup 6/ISCC.exe")) {
+            choco install innosetup --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed.' }
+          }
+      - name: Publish native portable application
+        shell: pwsh
+        run: |
+          $extra = @{}
+          if ('${{ github.event_name }}' -eq 'push' -or '${{ inputs.installer }}' -eq 'true') { $extra.Installer = $true }
+          ./scripts/Publish-Windows.ps1 -MediaDirectory artifacts/media @extra
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Crumb-windows-x64
+          path: |
+            artifacts/Crumb-*.zip
+            artifacts/Crumb-*.sha256
+            artifacts/Crumb-*-setup-*.exe
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-windows
+          path: tests/Crumb.Tests/TestResults/*.trx
+
+  preview:
+    needs: windows
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Crumb-windows-x64
+          path: release
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: preview-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: Crumb 0.1.0 preview ${{ github.run_number }}
+          prerelease: true
+          make_latest: false
+          body: |
+            Early Windows x64 preview. Download the portable ZIP, extract the complete folder, and run Crumb.exe.
+            Media tools and corresponding sources are included. The optional installer uses the same payload.
+            Automated media tests and a compression check through the published application passed.
+            Native dialogs, display scaling, and a clean Windows installation still need manual verification.
+          files: release/*
