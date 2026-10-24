@@ -1,0 +1,30 @@
+# .NET output
+**/bin/
+**/obj/
+artifacts/
+dist/
+publish/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# IDE and machine-local settings
+.vs/
+.idea/
+*.user
+*.suo
+*.sln.docstates
+.DS_Store
+Thumbs.db
+
+# Local credentials
+.env
+.env.*
+!.env.example
+
+# Local media, encoding logs, and bundled release tools
+samples/local/
+tools/local/
+ffmpeg2pass-*.log*
+*.partial.mp4
